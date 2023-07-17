@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"fmt"
+	"io/ioutil"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -12,9 +13,13 @@ import (
 var jsonList []map[string]string
 
 func Test(c *gin.Context) {
+	serialPath := "./conf/serial.txt"
+	serialByte, _ := ioutil.ReadFile(serialPath)
+	serial := string(serialByte)
+
 	var html string
 	jsonList = make([]map[string]string, 0)
-	Bid := c.DefaultQuery("bid", "66366")
+	Bid := c.DefaultQuery("bid", serial)
 	limit := c.DefaultQuery("limit", "10")
 	intLimit, _ := strconv.Atoi(limit)
 
@@ -27,10 +32,21 @@ func Test(c *gin.Context) {
 		title := gjson.Get(v["data"], "data.myDataSet.table.title")
 		startDate := gjson.Get(v["data"], "data.myDataSet.table.startDate")
 		content := gjson.Get(v["data"], "data.myDataSet.table.content")
-		html += "<h3>" + v["Bid"] + "<h3><br>"
-		html += "<h5>startDate</h5><br>" + startDate.Str + "<br>"
-		html += "<h5>title</h5><br>" + title.Str + "<br>"
-		html += "<h5>data</h5><br>" + content.Str + "<br>"
+
+		if title.Str != "" {
+			intBid, _ := strconv.Atoi(v["Bid"])
+			intSerial, _ := strconv.Atoi(serial)
+			if intBid > intSerial {
+				ioutil.WriteFile(serialPath, []byte(v["Bid"]), 0666)
+			}
+		}
+
+		fmt.Printf("content is empty: %v\n", (content.Str == ""))
+
+		html += "<h3>" + v["Bid"] + "<h3>"
+		html += "<h5>startDate</h5>" + startDate.Str + "<br>"
+		html += "<h5>title</h5>" + title.Str + "<br>"
+		html += "<h5>data</h5>" + content.Str + "<br>"
 		html += "<hr>"
 	}
 
