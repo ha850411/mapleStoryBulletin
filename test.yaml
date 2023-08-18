@@ -1,0 +1,1309 @@
+openapi: 3.0.1
+info:
+  title: CRM API
+  description: CRM所提供之API
+  version: 1.0.0
+servers:
+  - url: https://service-api.104dc-dev.com/
+tags:
+  - name: sales
+    description: 業務相關的API
+  - name: company
+    description: 公司相關的API
+  - name: chinaJob
+    description: 大陸職缺相關的 API
+  - name: checkIdentity
+    description: 證件上傳審核功能的 API
+  - name: vipAccounting
+    description: 會計備註資訊
+  - name: obCustomer
+    description: ObCustomer
+  - name: customerRights
+    description: 公司權益
+  - name: contactsList
+    description: 外撥管理
+  - name: invoice
+    description: 發票相關
+  - name: remark
+    description: 備註
+  - name: record
+    description: 紀錄
+paths:
+  /api/sales/getAutoAllotStaffNo/{source}:
+    get:
+      tags:
+        - sales
+      summary: 取得目標資源下所分配到的業務
+      parameters:
+        - name: source
+          in: path
+          description: 資源代號
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: successful operation
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      staffNo:
+                        type: string
+                        example: "0123"
+                        description: "工號"
+                      empId:
+                        type: string
+                        example: "0123"
+                        description: "員工編號"
+                      name:
+                        type: string
+                        example: "王小明"
+                        description: "姓名"
+                  metadata:
+                    type: string
+                    example: ""
+        default:
+          description: 錯誤
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: SALES_NOT_FOUND
+                  detail:
+                    type: object
+                    properties: {}
+                    example: {}
+  /api/sales/getPackageDiscount:
+    get:
+      tags:
+        - sales
+      summary: 取得vip呈現專員專屬優惠
+      parameters:
+        - name: custNo
+          in: query
+          description: 客戶編號
+          required: false
+          schema:
+            type: integer
+            example: 130000000080542
+        - name: newCustNo
+          in: query
+          description: 新客戶編號
+          required: false
+          schema:
+            type: integer
+            example: 130000000080542
+      responses:
+        200:
+          description: successful operation
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          example: "0123"
+                          description: "包套編號"
+                        adPeriod:
+                          type: object
+                          properties:
+                            standard:
+                              description: "自選標準刊期，無為空陣列"
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                                  example: "0123"
+                                  description: "標準刊期編號"
+                                publishDays:
+                                  type: integer
+                                  example: "7"
+                                  description: "刊登天數"
+                                giftPublishDays:
+                                  type: integer
+                                  example: "7"
+                                  description: "贈送口袋刊登天數(沒有填0)"
+                                price:
+                                  type: integer
+                                  example: "100"
+                                  description: "標準品實際售價"
+                                discount:
+                                  type: integer
+                                  example: "0"
+                                  description: "折扣金額(沒有填0)"
+                            package:
+                              description: "vm 刊期套餐，無為空陣列"
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                                  example: "0123"
+                                  description: "vm 刊登套餐編號"
+                        additionalProducts:
+                          type: object
+                          properties:
+                            standard:
+                              description: "自選標準加值，無為空陣列"
+                              type: object
+                              properties:
+                                focus:
+                                  type: object
+                                  properties:
+                                    quantity:
+                                      type: integer
+                                      example: "0"
+                                      description: "焦點數量(沒有填0)"
+                                    price:
+                                      type: integer
+                                      example: "100"
+                                      description: "實際售價(沒有填0)"
+                                pickup:
+                                  type: object
+                                  properties:
+                                    quantity:
+                                      type: integer
+                                      example: "0"
+                                      description: "精選數量(沒有填0)"
+                                    price:
+                                      type: integer
+                                      example: "100"
+                                      description: "實際售價(沒有填0)"
+                                jobSort:
+                                  type: object
+                                  properties:
+                                    quantity:
+                                      type: integer
+                                      example: "0"
+                                      description: "自動排序數量(沒有填0)"
+                                    price:
+                                      type: integer
+                                      example: "100"
+                                      description: "實際售價(沒有填0)"
+                                corporateImage:
+                                  type: object
+                                  properties:
+                                    quantity:
+                                      type: integer
+                                      example: "0"
+                                      description: "企型天數(沒有填0)"
+                                    price:
+                                      type: integer
+                                      example: "100"
+                                      description: "實際售價(沒有填0)"
+                            package:
+                              description: "vm 加值套餐，無為空陣列"
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                                  example: "0123"
+                                  description: "vm 加值套餐編號"
+                  metadata:
+                    type: string
+                    example: ""
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvalidParameters'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+  /api/sales/{orderId}/{seqSalesPackageDiscount}/applied:
+    patch:
+      tags:
+        - sales
+      summary: 回寫專員專屬優惠已使用
+      parameters:
+        - name: orderId
+          in: path
+          description: 網進order_id
+          required: true
+          schema:
+            type: integer
+            example: 0123
+        - name: seqSalesPackageDiscount
+          in: path
+          description: 專屬優惠代碼
+          required: true
+          schema:
+            type: string
+            example: 1541415341024103333
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                custNo:
+                  description: 客戶編號
+                  type: integer
+                  example: 130000000080542
+                newCustNo:
+                  description: 新客戶編號
+                  type: integer
+                  example: 130000000080542
+      responses:
+        '204':
+          description: No Content
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvalidParameters'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+  /api/company/getInfo/{invoice}:
+    get:
+      tags:
+        - company
+      summary: 透過統編取得公司相關資料
+      parameters:
+        - name: invoice
+          in: path
+          description: 統編
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: successful operation
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      custno:
+                        type: integer
+                        example: 12345
+                      autono:
+                        type: integer
+                        example: 54321
+                      mdmkey:
+                        type: string
+                        example: "12345"
+                      companyName:
+                        type: string
+                        example: 公司名稱
+                      database:
+                        type: string
+                        example: 新客
+                      adStatus:
+                        type: string
+                        example: off
+                      offDays:
+                        type: integer
+                        example: 123
+                      industry:
+                        type: integer
+                        example: 1008002001
+                      type:
+                        type: string
+                        example: 一般
+                      specails:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            name:
+                              type: string
+                              example: "拒絕往來"
+                            reason:
+                              type: string
+                              example: "測試"
+                  metadata:
+                    type: string
+                    example: ""
+        default:
+          description: 錯誤
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: DATABASE_SELECT_ERROR
+                  detail:
+                    type: object
+                    properties: {}
+                    example: {}
+  /api/company/getMdmKey:
+    post:
+      tags:
+        - company
+      summary: 透過一組或多組 custno 取得 mdmKey, 上限100組
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                custno:
+                  description: 公司編號
+                  type: array
+                  example:
+                    - 123456
+                    - 123457
+                  items:
+                    type: integer
+                  minItems: 1
+                  maxItems: 100
+              required:
+                - custno
+      responses:
+        200:
+          description: successful operation
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      custno:
+                        type: integer
+                        description: "公司編號"
+                      mdmKey:
+                        type: string
+                        description: "mdm_key"
+                    example:
+                      - custno: 123456
+                        mdmKey: "1906000000000000"
+                      - custno: 123457
+                        mdmKey: "1906000000000001"
+                  metadata:
+                    type: string
+                    example: ""
+        500:
+          description: custno格式錯誤
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: INVALID_ARGUMENT
+                  detail:
+                    type: string
+                    example: "error custno format:  130000000079547A"
+  /api/china/job:
+    post:
+      tags:
+        - chinaJob
+      summary: 新增大陸職缺後審資料
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                custno:
+                  description: "公司代碼"
+                  type: integer
+                  example: 130000000080542
+                jobno:
+                  description: "職缺代碼"
+                  type: integer
+                  example: 8320701
+                content_keywords:
+                  description: "疑似大陸職缺的關鍵字"
+                  type: string
+                  example: "駐外上海"
+                source:
+                  description: "判斷的來源"
+                  type: string
+                  example: "Loki"
+                loki_count:
+                  description: "信心指數"
+                  type: string
+                  example: "60 %"
+      responses:
+        '204':
+          description: No Content
+        '500':
+          description: 發生錯誤
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    description: "錯誤訊息"
+                    type: string
+                    example: JOB_INFO_NOT_FOUND
+                  detail:
+                    type: object
+                    properties: {}
+  /api/company/{custNo}/getVipAccount:
+    get:
+      tags:
+        - vipAccounting
+      summary: 舊客取得會計備註 (vip_account) 資料
+      description: 舊客網進需取會計備註一些資料，顯示在網進確認會計承辦人頁面
+      parameters:
+        - name: custNo
+          in: path
+          description: 客戶編號
+          required: true
+          schema:
+            type: integer
+            example: 130000000080542
+      responses:
+        '200':
+          description: 回傳會計備註資料
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/VipAccount'
+                  metadata:
+                    type: object
+                    example: {}
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvalidParameters'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+  /api/company/{custNo}/obcustomer:
+    post:
+      tags:
+        - obCustomer
+      summary: 新增 ObCustomer (關閉公司流程)
+      parameters:
+        - name: custNo
+          in: path
+          description: 客戶編號
+          required: true
+          schema:
+            type: integer
+            example: 130000000080542
+      responses:
+        '204':
+          description: No Content
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvalidParameters'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+  /api/company/{custNo}/updateCustomerRights:
+    post:
+      tags:
+        - customerRights
+      summary: 更新公司資料權益欄位
+      description: 權益服務收到變更時，需要再通知 Service 調整部長設定值（清空設定）
+      parameters:
+        - name: custNo
+          in: path
+          description: 客戶編號
+          required: true
+          schema:
+            type: integer
+            example: 130000000080542
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                updateCustomerRights:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      oldCount:
+                        type: integer
+                        example: 123
+                        description: 舊的設定數量
+                      newCount:
+                        type: integer
+                        example: 666
+                        description: 新的設定數量
+                      item:
+                        type: integer
+                        example: 1
+                        description: |-
+                          設定項目。
+                          - 1: 接觸數
+                          - 2: 啟用帳號數
+                          - 3: 建立帳號數
+                      source:
+                        type: integer
+                        example: 0
+                        description: |-
+                          項目來源 (帶入即將更新的權益的來源)。**[來自專員變更不應該呼叫]**
+                          - 0: 一般基本權益
+                          - 1: 來自專員變更
+                          - 2: 來自刊登套餐
+                          - 3: 來自白金
+                          - 4: 白名單
+      responses:
+        '204':
+          description: No Content
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvalidParameters'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+  /api/company/{custNo}/contactsList/{contentRunType}:
+    patch:
+      tags:
+        - contactsList
+      summary: 更新外撥列表
+      parameters:
+        - name: custNo
+          in: path
+          description: 客戶編號
+          required: true
+          schema:
+            type: integer
+            example: 130000000080542
+        - name: contentRunType
+          in: path
+          required: true
+          description: 狀態。e.g- expired (到期)、paused (暫停)
+          schema:
+            type: string
+            example: expired
+            enum:
+              - expired
+              - paused
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                executeDate:
+                  type: string
+                  format: date
+                  description: 執行日期 (預設當下執行日期)
+                  example: '2023-03-31'
+      responses:
+        '204':
+          description: No Content
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvalidParameters'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+  /api/company/{custNo}/approved:
+    patch:
+      tags:
+        - company
+      summary: 修改自刊資料
+      parameters:
+        - name: custNo
+          in: path
+          description: 客戶編號
+          required: true
+          schema:
+            type: integer
+            example: 130000000080542
+      responses:
+        '204':
+          description: No Content
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvalidParameters'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+  /api/company/{custNo}/invoice/performanceAdjustment:
+    put:
+      tags:
+        - invoice
+      summary: 開立發票或是作廢發票回寫至退刊/業績調整
+      parameters:
+        - name: custNo
+          in: path
+          description: 客戶編號
+          required: true
+          schema:
+            type: integer
+            example: 130000000080542
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: Update request
+              type: object
+              properties:
+                invoiceStatus:
+                  type: integer
+                  description: |-
+                    該發票狀態
+                    - 1: 作廢
+                    - 2: 立帳
+                    - 3: 退刊
+                  example: 1
+                item:
+                  description: 商品資訊
+                  type: object
+                  properties:
+                    type:
+                      type: string
+                      description: |-
+                        商品種類
+                        - `ad-period`: 刊期
+                        - `additional-product`: 加值商品
+                      enum:
+                        - ad-period
+                        - additional-product
+                      example: "ad-period"
+                    id:
+                      type: string
+                      description: |-
+                        根據商品種類，傳入商品ID
+                        - 刊期: `po.ponum`
+                        - 加值: `introduct_po.auto_no`
+                      example: "1231321238"
+                    fId:
+                      type: string
+                      description: |-
+                        加值委託單號(F開頭)
+                        如果 `item.type` = `"additional-product"`，則此欄位必須要傳遞，反之則否。
+                      example: F1239128390
+                  required:
+                    - type
+                    - id
+              required:
+                - invoiceStatus
+                - item
+              oneOf:
+                - $ref: '#/components/schemas/Reject'
+                - $ref: '#/components/schemas/Posting'
+            examples:
+              PostingByAdPeriod:
+                summary: 發票狀態是`立帳`且傳遞`刊期商品`資訊
+                value:
+                  invoiceStatus: 2
+                  item:
+                    type: ad-period
+                    id: 12312312
+                  date: 1681278593
+                  tax: 0
+              PostingByAdditionalProduct:
+                summary: 發票狀態是`立帳`且傳遞`加值商品`資訊
+                value:
+                  invoiceStatus: 2
+                  item:
+                    type: additional-product
+                    id: 12312312
+                    fId: F381209738912
+                  date: 1681278593
+                  tax: 5
+              RejectByAdPeriod:
+                summary: 發票狀態是`退刊`且傳遞`刊期商品`資訊
+                value:
+                  invoiceStatus: 3
+                  item:
+                    type: ad-period
+                    id: 12312312
+                  rejectId: 1231231
+                  oldPrice: 1220
+                  newPrice: 3500
+                  date: 1681278593
+                  tax: 5
+              RejectByAdditionalProduct:
+                summary: 發票狀態是`退刊`且傳遞`加值商品`資訊
+                value:
+                  invoiceStatus: 3
+                  item:
+                    type: additional-product
+                    id: 12312312
+                    fId: F381209738912
+                  rejectId: 1231231
+                  oldPrice: 1220
+                  newPrice: 3500
+                  date: 1681278593
+                  tax: 5
+              RevokeByAdPeriod:
+                summary: 發票狀態是`作廢`且傳遞`刊期商品`資訊
+                value:
+                  invoiceStatus: 1
+                  item:
+                    type: ad-period
+                    id: 12312312
+              RevokeByAdditionalProduct:
+                summary: 發票狀態是`作廢`且傳遞`加值商品`資訊
+                value:
+                  invoiceStatus: 1
+                  item:
+                    type: additional-product
+                    id: 12312312
+                    fId: F381209738912
+      responses:
+        '204':
+          description: No Content
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvalidParameters'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+  /api/company/{custNo}/extendDays/remark:
+    post:
+      tags:
+        - remark
+      summary: 新增贈送延長 / 暫停天數的備註
+      description: 贈送延長刊期、暫停天數需寫入相關備註說明
+      parameters:
+        - name: custNo
+          in: path
+          description: 客戶編號
+          required: true
+          schema:
+            type: integer
+            example: 130000000080542
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: Update request
+              type: object
+              properties:
+                empNo:
+                  type: string
+                  description: 員工編號(emp_no)
+                  example: "30101"
+                inventoryId:
+                  type: string
+                  example: 1830819
+                  description: |-
+                    委託單單號， 原本的 `po.ponum`
+                days:
+                  type: integer
+                  example: 2
+                  description: 天數
+                type:
+                  type: integer
+                  example: 1
+                  description: |-
+                    天數的狀態:
+                    - `1` : 刊期的天數
+                    - `2` : 暫停的天數
+                reasonCode:
+                  type: integer
+                  example: 583
+                  description: |-
+                    贈送原因待碼；
+                    請參考 `m005013.pocket_reason.pr_id`
+              required:
+                - empNo
+                - inventoryId
+                - days
+                - type
+                - reasonCode
+      responses:
+        '204':
+          description: No Content
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvalidParameters'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+  /api/company/{custNo}/salesDiscountRecord:
+    post:
+      tags:
+        - record
+      summary: 專員折扣記錄
+      description: 舊客網進買入刊登套餐完成後，需寫入專員折扣記錄。
+      parameters:
+        - name: custNo
+          in: path
+          description: 客戶編號
+          required: true
+          schema:
+            type: integer
+            example: 130000000080542
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: Create SalesDiscountRecord Request
+              type: object
+              properties:
+                adPeriodId:
+                  type: string
+                  example: "1830819"
+                  description: |-
+                    委託單單號， 原本的 `po.ponum`
+                price:
+                  type: integer
+                  example: 3400
+                  default: 0
+                  description: 金額
+                type:
+                  type: integer
+                  example: 1
+                  description: |-
+                    折扣類型:
+                    - `1` : po單
+                    - `2` : po單送天數
+                    - `3` : 加值免費單
+                    - `4` : 加值免費單送天數
+                additionalProductId:
+                  type: string
+                  example: "59153215"
+                  default: "0"
+                  description: |-
+                    加值單單號，原本的 `introduct_po.auto_no`，
+                    如果 `type = 3` or `type = 4`，則必須要填入
+                empNo:
+                  type: string
+                  description: 輸入專員，員工編號(emp_no)
+                  example: "30101"
+                  default: "0"
+                loginNo:
+                  type: string
+                  example: "1685208768503119782"
+                  default: "0"
+                  description: vip_login帳號 (網進客戶帳號編號)
+                packageId:
+                  type: string
+                  example: "312312315"
+                  default: "0"
+                  description: 刊登套餐編號
+                itemType:
+                  type: integer
+                  example: 1
+                  description: |-
+                    贈送項目:
+                    - `1` : 折扣金額
+                    - `2` : 刊登天數
+                    - `3` : 焦點職缺
+                    - `4` : 精選工作
+                    - `5` : 白金VIP
+                    - `6` : 企業形象
+                    - `7` : 查詢點數
+                    - `8` : 自動排序
+                quantity:
+                  type: integer
+                  example: 23
+                  default: 0
+                  description: 贈送天數/則數
+              required:
+                - adPeriodId
+                - type
+                - itemType
+      responses:
+        '204':
+          description: No Content
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvalidParameters'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+  /api/checkIdentity/addUnapprovedData:
+    post:
+      tags:
+      - checkIdentity
+      summary: 新增一筆未審核的資料
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                pid:
+                  description: "PID"
+                  type: integer
+                  example: 12345678
+                uploadDate:
+                  description: "上傳日期"
+                  type: string
+                  example: "2020-01-01 00:00:00"
+                type:
+                  description: "上傳類型（0:檔案上傳、1:非本人註冊、2:內政部身分證領補換）"
+                  type: integer
+                  example: 0
+                lastName:
+                  description: "姓"
+                  type: string
+                  example: "林"
+                firstName:
+                  description: "名字(請給加密過後)"
+                  type: string
+                  example: "1530f7017962b7f6fb56dcdbb3252c600"
+                imgUrl:
+                  description: "圖片網址"
+                  type: string
+                  example: "https://104.com.tw"
+      responses:
+        200:
+          description: successful operation
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      status:
+                        type: string
+                        example: "true"
+                        description: "狀態"
+                  metadata:
+                    type: object
+                    example: []
+        500:
+          description: 錯誤
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: DATA_IS_UNAPPROVED
+                  detail:
+                    type: object
+                    properties: {}
+                    example: {}
+  /api/checkIdentity/editImgUrl:
+    put:
+      tags:
+      - checkIdentity
+      summary: 修正圖片URL
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                pid:
+                  description: "PID"
+                  type: integer
+                  example: 12345678
+                imgUrl:
+                  description: "圖片網址"
+                  type: string
+                  example: "https://104.com.tw"
+      responses:
+        200:
+          description: successful operation
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      status:
+                        type: string
+                        example: "true"
+                        description: "狀態"
+                  metadata:
+                    type: object
+                    example: []
+        500:
+          description: 錯誤
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: UNAPPROVED_DATA_IS_NOT_EXISTS
+                  detail:
+                    type: object
+                    properties: {}
+                    example: {}
+components:
+  schemas:
+    Posting:
+      type: object
+      title: 立帳
+      description: 如果需要立帳，只需要告知發票日期
+      properties:
+        date:
+          type: integer
+          format: int32
+          example: 1681278593
+          description: 發票日期 (Unix time format)
+        tax:
+          type: integer
+          description: 發票稅率 (%)
+          example: 5
+      required:
+        - date
+        - tax
+    Reject:
+      type: object
+      title: 退刊
+      description: 如果是要退刊，必須回傳下列數據
+      properties:
+        rejectId:
+          type: string
+          description: 退刊單號
+          example: 123312321
+        oldPrice:
+          type: integer
+          description: 舊發票金額
+          example: 2130
+        newPrice:
+          type: integer
+          description: 新發票金額
+          example: 7777
+        date:
+          type: integer
+          format: int32
+          example: 1681278593
+          description: 會計退刊日期 (Unix time format)
+        tax:
+          type: integer
+          description: 發票稅率 (%)
+          example: 10
+      required:
+        - rejectId
+        - oldPrice
+        - newPrice
+        - date
+        - tax
+    VipAccount:
+      type: object
+      properties:
+        contact:
+          type: string
+          description: 承辦人 (加密過的資料)
+          example: 11ef1bad2b10d1de4b4dfa75fb7799189
+        accountingContact:
+          type: string
+          description: 會計聯絡人 (加密過的資料)
+          example: 1d25362b85297ab6814891a5e455c2768
+        email:
+          type: string
+          description: 承辦人E-mail (加密過的資料)
+          example: 134ffc8ffe38966a9b8b32e5c54f661df
+        invoiceEmail:
+          type: string
+          description: 電子發票收件E-mail (加密過的資料)
+          example: 1471a5647803bc6075aafd755f0167afb
+        invoiceTitle:
+          type: string
+          description: 發票抬頭
+          example: 大XXXXXXX股份有限公司
+        taxId:
+          type: string
+          description: 統一編號
+          example: "90557160"
+        address:
+          $ref: '#/components/schemas/Address'
+
+    Address:
+      title: Address
+      description: Components of a address
+      properties:
+        regionCode:
+          description: See http://static.104.com.tw/category-tool/xml/newfunction01.xml.
+          type: integer
+          example: 6001001003
+        street:
+          description: 街道地址
+          type: string
+          example: 寶中路119之1號10樓
+      type: object
+
+    Error:
+      title: Error Response
+      description: 當 API 回傳錯誤時的 object
+      properties:
+        message:
+          description: 錯誤訊息
+          type: string
+          default: ''
+        detail:
+          description: 錯誤內容
+          type: string
+          default: ''
+      type: object
+    InvalidParameters:
+      allOf:
+        - $ref: '#/components/schemas/Error'
+        - type: object
+          properties:
+            message:
+              type: string
+              default: INVALID_ARGUMENT
+            detail:
+              type: string
+              default: 無效的參數
+      title: Invalid Parameters Response
+    NotFound:
+      allOf:
+        - $ref: '#/components/schemas/Error'
+        - type: object
+          properties:
+            message:
+              type: string
+              default: NOT_FOUND
+            detail:
+              type: string
+              default: 找不到對應資源
+      title: Not Found Response
+    InternalServerError:
+      allOf:
+        - $ref: '#/components/schemas/Error'
+        - type: object
+          properties:
+            message:
+              type: string
+              default: INTERNAL_SERVER_ERROR
+            detail:
+              type: string
+              default: 伺服器錯誤
+      title: Internal Server Error Response
